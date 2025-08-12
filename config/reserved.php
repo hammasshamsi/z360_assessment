@@ -1,0 +1,24 @@
+<?php
+return[
+    'subdomains' => [
+        'admin',
+        'dashboard',
+        'api',
+        'auth',
+        'login',
+        'register',
+        'logout',
+        'home',
+        'settings',
+        'profile',
+        'support',
+        'help',
+        'www',
+        'app',
+        'web',
+        'http',
+        'https',
+        'mail',
+        'contact',
+    ],
+];
