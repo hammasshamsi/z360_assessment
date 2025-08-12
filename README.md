@@ -71,7 +71,7 @@ This project is configured to run in a local development environment using **XAM
 
 ```bash
 # Clone the repository
-git clone <your-repository-url> myassessment
+git clone https://github.com/hammasshamsi/z360_assessment.git myassessment
 cd myassessment
 
 # Install PHP dependencies
@@ -130,7 +130,7 @@ php artisan key:generate
 127.0.0.1    myapp.test
 127.0.0.1    landlord.myapp.test
 # Add tenants you create here for testing
-# 127.0.0.1    acme.myapp.test
+# 127.0.0.1    xyz.myapp.test
 # 127.0.0.1    status.myapp.test
 ```
 
@@ -182,7 +182,7 @@ You are now ready to use the application!
     *   **Remember:** After creating a tenant (e.g., with subdomain `xyz`), you must add `127.0.0.1 xyz.myapp.test` to your `hosts` file if not using DNS Server App.
 
 2.  **Access the Tenant Workspace:**
-    *   Navigate to your tenant's URL: `http://acme.myapp.test/login`
+    *   Navigate to your tenant's URL: `http://xyz.myapp.test/login`
     *   Log in with the credentials you created during onboarding.
 
 3.  **Access the Landlord Panel:**
