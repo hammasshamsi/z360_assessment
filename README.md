@@ -1,6 +1,6 @@
 # Laravel Multi-Tenant Z360 SaaS Assessment
 
-This project is a comprehensive demonstration of a multi-tenant Software-as-a-Service (SaaS) application built with Laravel 11. It showcases a robust architecture designed to handle multiple isolated tenant environments, a central landlord administration panel, and a global public-facing onboarding system.
+This project is a comprehensive demonstration of a multi-tenant Software-as-a-Service (SaaS) application built with Laravel 12. It showcases a robust architecture designed to handle multiple isolated tenant environments, a central landlord administration panel, and a global public-facing onboarding system.
 
 The core of the application is built upon the `spatie/laravel-multitenancy` package, configured for domain-based tenant resolution and complete database isolation.
 
