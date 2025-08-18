@@ -8,6 +8,7 @@ use App\Http\Requests\Step2Request;
 use App\Models\OnboardingSession;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
+use Inertia\Inertia;
 
 
 class Step2Controller extends Controller
@@ -26,7 +27,8 @@ class Step2Controller extends Controller
         session(['onboarding_token' => $token]);
         $session = OnboardingSession::where('token', $token)->firstorFail();
         
-        return view('onboarding.step2', compact('session'));
+        // return view('onboarding.step2', compact('session'));
+        return Inertia::render('Onboarding/Step2');
     }
 
     public function store(Step2Request $request)

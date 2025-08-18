@@ -42,7 +42,18 @@ class Step3Request extends FormRequest
                     ->when($token, fn($q) => $q->where('token', '!=', $token))
                     ->exists();
 
-                    $existsInTenants = Tenant::where('domain', $value)->exists();
+                    $currentTenantId = null;
+                    if ($token) {
+                        $session = OnboardingSession::where('token', $token)->first();
+                        if ($session && $session->tenant_id) {
+                           $currentTenantId = $session->tenant_id;
+                        }
+                    }
+
+                    // checking for other tenants with same domain, ignoring the current one.
+                    $existsInTenants = Tenant::where('domain', $value)
+                        ->when($currentTenantId, fn($q) => $q->where('id', '!=', $currentTenantId))
+                        ->exists();
                     if ($existsInSessions || $existsInTenants) {
                         $fail('The subdomain has already been taken.');
                     }

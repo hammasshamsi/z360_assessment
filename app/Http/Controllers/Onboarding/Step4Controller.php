@@ -7,6 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Models\OnboardingSession;
 use Illuminate\Support\Facades\URL;
 use App\Http\Requests\Step4Request;
+use Illuminate\Support\Facades\Config;
+use Inertia\Inertia;
+use Inertia\Response;
 
 
 class Step4Controller extends Controller
@@ -22,8 +25,16 @@ class Step4Controller extends Controller
                 ->withErrors('Your onboarding session has expired. Please start again.');
         }
         session(['onboarding_token' => $token]);
-        $session = OnboardingSession::where('token', $token)->firstorFail();
-        return view('onboarding.step4', compact('session'));
+        $session = OnboardingSession::where('token', $token)->firstOrFail();
+
+        // get allowec countries directly from config
+        $allowedCountries = Config::get('countries.allowed', []);
+
+        // return view('onboarding.step4', compact('session'));
+        return Inertia::render('Onboarding/Step4', [
+            'sessionData' => $session->only('billing_name', 'billing_address', 'country', 'phone'),
+            'allowedCountries' => $allowedCountries,
+        ]);
     }
 
     public function store(Step4Request $request)

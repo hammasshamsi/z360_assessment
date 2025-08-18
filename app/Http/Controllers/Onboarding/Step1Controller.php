@@ -8,21 +8,39 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Str;
 use App\Models\OnboardingSession;
 use Illuminate\Support\Facades\URL;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class Step1Controller extends Controller
 {
     /**
      * Show the first step of the onboarding process.
      */
-    public function show()
+    public function show(Request $request)
     {
-        $token = session('onboarding_token');
+        // $token = session('onboarding_token');
 
+        // $session = null;
+        // if ($token) {
+        //     $session = OnboardingSession::where('token', $token)->first();
+        // }
+        // // return view('onboarding.step1', compact('session'));
+        // return inertia('Onboarding/Step1', [
+        //     'session' => $session,
+        // ]);
+
+        $token = session('onboarding_token') ? $request->has('token') : null;
         $session = null;
+        $sessionData = [];
+        // check if user is coming back to edit from a later step
         if ($token) {
-            $session = OnboardingSession::where('token', $token)->first();
+            $session = OnboardingSession::where('token', $token)->firstOrFail();
+            $sessionData = $session->only('full_name', 'email');
+            // session(['onboarding_token' => $request->token]);
         }
-        return view('onboarding.step1', compact('session'));
+        return Inertia::render('Onboarding/Step1', [
+            'sessionData' => $sessionData
+        ]);
     }
 
     /**
@@ -45,6 +63,7 @@ class Step1Controller extends Controller
                 'full_name' => $validated['full_name'],
                 'email' => $validated['email'],
                 'token' => $token,
+                'current_step' => 2, // setting progress for step2
             ]);
             
             session(['onboarding_token' => $token]);
@@ -52,5 +71,7 @@ class Step1Controller extends Controller
         //generating signed continuation url with toke
         $url = URL::signedRoute('onboarding.step2',['token'=>$token]);
         return redirect($url);
+
+        // return redirect()->route('onboarding.step2', ['token' => $token]);
     }
 }

@@ -86,42 +86,4 @@ class ResumeController extends Controller
 
         return redirect()->signedRoute('onboarding.step5', ['token' => $session->token]);
     }
-
-
-    // public function __invoke(Request $request){
-
-    //     $token = session('onboarding_token') ?? $request->query('token');
-
-    //     if (! $token) {
-    //         return redirect()->route('onboarding.step1');
-    //     }
-
-    //     $session = OnboardingSession::where('token', $token)->first();
-
-    //     if (! $session) {
-    //         return redirect()->route('onboarding.step1');
-    //     }
-
-    //     // save token for future use
-    //     session(['onboarding_token' => $token]);
-
-    //     if (! $session->full_name || ! $session->email) {
-    //         // missing step 1 data -> resume Step 1 with signed link
-    //         return redirect(URL::signedRoute('onboarding.step1', ['token' => $token]));
-    //     }
-
-    //     if (! $session->password) {
-    //         // step2
-    //         return redirect(URL::signedRoute('onboarding.step2', ['token' => $token]));
-    //     }
-
-    //     if (! $session->company_name || ! $session->subdomain) {
-    //         // step3
-    //         return redirect(URL::signedRoute('onboarding.step3', ['token' => $token]));
-    //     }
-
-    //     // if all previous complete, go to Step 4
-    //     return redirect(URL::signedRoute('onboarding.step4', ['token' => $token]));
-
-    // }
 }

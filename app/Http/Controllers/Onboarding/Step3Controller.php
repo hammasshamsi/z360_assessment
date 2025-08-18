@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Step3Request;
 use App\Models\OnboardingSession;
 use Illuminate\Support\Facades\URL;
+use Inertia\Inertia;  
+use Inertia\Response;
 
 
 class Step3Controller extends Controller
@@ -24,8 +26,10 @@ class Step3Controller extends Controller
         }
         session(['onboarding_token' => $token]);
         $session = OnboardingSession::where('token', $token)->firstorFail();
-        return view('onboarding.step3', compact('session'));
-
+        // return view('onboarding.step3', compact('session'));
+        return Inertia::render('Onboarding/Step3', [
+            'sessionData' => $session->only('company_name', 'subdomain')
+        ]);
     }
 
     public function store(Step3Request $request)
@@ -43,5 +47,6 @@ class Step3Controller extends Controller
         ]);
         $url = URL::signedRoute('onboarding.step4', ['token' => $session->token]);
         return redirect($url);
+        // return redirect()->route('onboarding.step4', ['token' => $session->token]);
     }
 }

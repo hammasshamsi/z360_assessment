@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-        
+
         // more better if we store in env file and call here
         DB::table('admins')->updateOrInsert(
             ['email' => 'admin@myapp.test'],

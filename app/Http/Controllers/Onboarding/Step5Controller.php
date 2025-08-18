@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\OnboardingSession;
 use App\Http\Requests\Step5Request;
 use App\Services\TenantProvisioningService;
+use Inertia\Inertia;
+use Inertia\Response;
+use Illuminate\Support\Facades\URL;
 
 class Step5Controller extends Controller
 {
@@ -25,22 +28,31 @@ class Step5Controller extends Controller
 
         $session = OnboardingSession::where('token', $token)->firstOrFail();
 
-        return view('onboarding.step5', compact('session'));
+        // return view('onboarding.step5', compact('session'));
+        return Inertia::render('Onboarding/Step5', [
+            'summary' => $session->toArray(),
+            'editUrls' => [
+                'step1' => URL::signedRoute('onboarding.step1', ['token' => $session->token]),
+                'step3' => URL::signedRoute('onboarding.step3', ['token' => $session->token]),
+                'step4' => URL::signedRoute('onboarding.step4', ['token' => $session->token]),
+            ]
+        ]);
     }
 
     public function store(Step5Request $request, TenantProvisioningService $service)
     {
         $token = session('onboarding_token');
         $session = OnboardingSession::where('token', $token)->firstOrFail();
-
+        
         $tenant = $service->provision($session);
 
         // clear onboarding session as it's complete
         session()->forget('onboarding_token');
-        return redirect()->route('tenant.login', ['subdomain' => $tenant->domain])
-            ->with('success', 'Welcome! Your workspace is ready.');
+        // return redirect()->route('tenant.login', ['subdomain' => $tenant->domain]);
 
-        //     return redirect()->to("http://{$tenant->domain}.myapp.test:8000/login")
-        // ->with('success', 'Welcome! Your workspace is ready.');
+        return response()->json([
+            'message' => 'Provisioning started successfully.',
+            'subdomain' => $tenant->domain,
+        ]);
     }
 }

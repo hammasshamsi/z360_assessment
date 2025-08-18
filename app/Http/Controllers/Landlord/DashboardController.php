@@ -8,6 +8,8 @@ use App\Models\OnboardingSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\Multitenancy\Models\Tenant as SpatieTenant;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\URL;
 
 class DashboardController extends Controller
 {
@@ -47,12 +49,30 @@ class DashboardController extends Controller
             });
         }
         
-        $tenants = $query->orderBy('created_at', 'desc')->paginate(20);
+        $tenants = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
         
-        // recent onboarding session
-        $recentSessions = OnboardingSession::orderBy('created_at', 'desc')->take(10)->get();
+        // // recent onboarding session
+        // $recentSessions = OnboardingSession::orderBy('created_at', 'desc')->take(10)->get();
+
+        $recentSessions = OnboardingSession::orderBy('created_at', 'desc')->take(5)->get()
+            ->map(function ($session) {
+                // Add the signed resume url to each session object
+                if (!$session->is_complete) {
+                    $session->resume_url = URL::signedRoute('onboarding.resume', ['token' => $session->token]);
+                }
+                return $session;
+            });
         
-        return view('landlord.dashboard', compact('stats', 'tenants', 'recentSessions'));
+        // return view('landlord.dashboard', compact('stats', 'tenants', 'recentSessions'));
+        return Inertia::render('Landlord/Dashboard', [
+            'stats' => $stats,
+            'tenants' => $tenants,
+            'recentSessions' => $recentSessions,
+            'filters' => $request->only(['search', 'status']), // pass filters back to the view
+            'db_context' => DB::connection()->getDatabaseName(),
+            'spatie_context' => SpatieTenant::current() ? 'TENANT' : 'LANDLORD',
+
+        ]);
     }
     
     public function tenantDetails(Tenant $tenant)
