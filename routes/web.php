@@ -28,15 +28,15 @@ Route::domain('myapp.test')->group(function () {
     })->name('onboarding.new');
 
     Route::prefix('onboarding')->name('onboarding.')->group(function () {
-        Route::get('resume', ResumeController::class)->name('resume');
+        Route::get('resume', ResumeController::class)->name('resume')->middleware('onboarding.progress');
         Route::get('/step-1', [Step1Controller::class, 'show'])->name('step1');
         Route::post('/step-1', [Step1Controller::class, 'store']);
         Route::get('/step-2', [Step2Controller::class, 'show'])->name('step2')->middleware('signed');
-        Route::post('/step-2', [Step2Controller::class, 'store']);
+        Route::post('/step-2', [Step2Controller::class, 'store'])->middleware('onboarding.progress');
         Route::get('/step-3', [Step3Controller::class, 'show'])->name('step3')->middleware('signed');
-        Route::post('/step-3', [Step3Controller::class, 'store']);
+        Route::post('/step-3', [Step3Controller::class, 'store'])->middleware('onboarding.progress');
         Route::get('/step-4', [Step4Controller::class, 'show'])->name('step4')->middleware('signed');
-        Route::post('/step-4', [Step4Controller::class, 'store']);
+        Route::post('/step-4', [Step4Controller::class, 'store'])->middleware('onboarding.progress');
         Route::get('/step-5', [Step5Controller::class, 'show'])->name('step5')->middleware('signed');
         Route::post('/step-5', [Step5Controller::class, 'store']);
         Route::get('/success/{tenant}', function($tenantId) {
