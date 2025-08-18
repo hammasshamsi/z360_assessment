@@ -2,7 +2,7 @@
 
 This project is a comprehensive demonstration of a multi-tenant Software-as-a-Service (SaaS) application built with Laravel 12. It showcases a robust architecture designed to handle multiple isolated tenant environments, a central landlord administration panel, and a global public-facing onboarding system.
 
-The core of the application is built upon the `spatie/laravel-multitenancy` package, configured for domain-based tenant resolution and complete database isolation.
+The core of the application is built upon the `spatie/laravel-multitenancy` package, configured for domain-based tenant resolution and complete database isolation. The frontend is powered by Inertia.js, React, and TypeScript, offering a modern, single-page application experience.
 
 ---
 
@@ -48,42 +48,39 @@ The isolated, private workspace for each individual tenant organization. This is
 
 ## ✨ Key Features Implemented
 
+*   **Modern Frontend Stack:** The application uses a modern, reactive frontend built with **Inertia.js**, **React**, and **TypeScript**, providing a seamless, single-page application experience.
 *   **Dynamic Tenant Provisioning:** New tenants and their databases are created automatically upon successful sign-up.
 *   **Domain-Based Tenant Resolution:** Uses the powerful `DomainTenantFinder` from the Spatie package to identify tenants.
 *   **Queued Jobs for Performance:** Tenant creation is offloaded to a background queue, preventing UI delays.
-*   **Custom Middleware:**
-    *   `LandlordAuth`: A simple middleware to protect the landlord administration panel.
+*   **Secure Onboarding Flow:** A secure, multi-step sign-up process with signed URLs prevents users from skipping steps.
+*   **Secure Landlord Authentication:** The landlord admin panel is protected, and admin credentials are now managed securely via database seeders, removing hard-coded passwords.
+*   **Automated Session Cleanup:** A scheduled command automatically cleans up abandoned onboarding sessions to maintain database hygiene.
+*   **Comprehensive Test Coverage:** The application includes a suite of feature tests to ensure the reliability and correctness of the onboarding flow and other critical features.
 *   **Clean & Professional Code Structure:** Logic is properly abstracted into Controllers and Middleware, keeping route files clean, readable, and declarative.
-*   **Secure Authentication Flow:** Implements CSRF protection and session management correctly across multiple subdomains.
 
 ---
 
-## 💻 Local Development Setup
+## � Local Development Setup (Docker)
 
-This project is configured to run in a local development environment using **XAMPP** (or a similar stack with Apache).
+This project is configured to run in a local development environment using Docker.
 
 ### Prerequisites
-*   XAMPP (with Apache & MySQL)
-*   PHP 8.2 or higher
-*   Composer
+*   Docker Desktop
 
-### Step 1: Clone & Install Dependencies
+### Step 1: Clone & Configure Environment
 
 ```bash
 # Clone the repository
 git clone https://github.com/hammasshamsi/z360_assessment.git myassessment
 cd myassessment
 
-# Install PHP dependencies
-composer install
-
 # Copy the environment file
 cp .env.example .env
 ```
 
-### Step 2: Configure Environment (`.env`)
+### Step 2: Configure `.env` for Docker
 
-Open the `.env` file and configure the following variables:
+Open the `.env` file and ensure the following variables are set correctly for the Docker environment:
 
 ```dotenv
 APP_NAME="Laravel Multi-Tenant Assessment"
@@ -92,83 +89,78 @@ APP_DOMAIN=myapp.test
 
 # Landlord Database Connection
 DB_CONNECTION=landlord
-DB_HOST=127.0.0.1
+DB_HOST=db
 DB_PORT=3306
 DB_DATABASE=landlord
 DB_USERNAME=root
-DB_PASSWORD=
+DB_PASSWORD= # Your desired root password for the DB container
 
 # Session Configuration for Subdomain Sharing
 SESSION_DOMAIN=.myapp.test
 ```
 
-### Step 3: Database Setup
+### Step 3: Configure Local Host Environment
 
-1.  Open phpMyAdmin (or your preferred MySQL client).
-2.  Create a new, empty database named `myassessment_landlord`.
-3.  Run the landlord migrations to create the necessary tables.
+For the application's domain and subdomains to work on your local machine, you need to edit your `hosts` file.
 
-```bash
-php artisan migrate --database=landlord
-```
-
-### Step 4: Generate Application Key
-
-```bash
-php artisan key:generate
-```
-
-### Step 5: Configure Local Host Environment
-
-**A. Configure Windows `hosts` file:**
-
-1.  Open **Notepad** as an **Administrator**.
-2.  Open the file: `C:\Windows\System32\drivers\etc\hosts`
-3.  Add the following lines to the end of the file. You must add a new line for every tenant you create during testing.
+1.  Open your `hosts` file with administrator/sudo privileges.
+    *   **Windows:** `C:\Windows\System32\drivers\etc\hosts`
+    *   **macOS/Linux:** `/etc/hosts`
+2.  Add the following lines. You must add a new line for every tenant you create during testing.
 
 ```
 127.0.0.1    myapp.test
 127.0.0.1    landlord.myapp.test
 # Add tenants you create here for testing
 # 127.0.0.1    xyz.myapp.test
-# 127.0.0.1    status.myapp.test
 ```
 
-**B. Configure Apache Virtual Host:**
+### Step 4: Build and Run the Application
 
-1.  Open the Apache config file: `C:\xampp\apache\conf\extra\httpd-vhosts.conf`
-2.  Add the following Virtual Host configuration. This single block handles the root domain and all wildcard subdomains.
-
-```apache
-<VirtualHost *:80>
-    # IMPORTANT: Update this path to your project's public folder
-    DocumentRoot "C:/path/to/your/project/myassessment/public"
-    ServerName myapp.test
-    ServerAlias *.myapp.test
-    
-    <Directory "C:/path/to/your/project/myassessment/public">
-        AllowOverride All
-        Require all granted
-        Options Indexes FollowSymLinks
-    </Directory>
-</VirtualHost>
-```
-**C. Use DNS Server App:**
-1. Click your new zone myapp.test.
-*   **Click Add Record**: Name: *, Type: A, Data: 127.0.0.1
-
-
-2. Ensure Root Domain Works Too, Add another A record:
-*   **Click Add Record**: Name: @, Type: A, Data: 127.0.0.1
-
-
-### Step 6: Start Services & Run Queue
-
-1.  **Start Apache and MySQL** from the XAMPP Control Panel.
-2.  **Run the Queue Worker:** Open a new terminal in your project directory and run the following command. This worker is **essential** for processing new tenant sign-ups.
+Use `docker-compose` to build the images and run the containers in the background.
 
 ```bash
-php artisan queue:work --queue=provisioning
+docker-compose up -d --build
+```
+
+### Step 5: Final Application Setup
+
+Once the containers are running, execute the following commands to finalize the setup inside the `app` container.
+
+```bash
+# Install PHP dependencies
+docker-compose exec app composer install
+
+# Generate the application key
+docker-compose exec app php artisan key:generate
+
+# Run landlord migrations to set up the central database
+docker-compose exec app php artisan migrate --database=landlord
+
+# Seed the database with the landlord admin user
+docker-compose exec app php artisan db:seed
+
+# Install NPM dependencies and build frontend assets
+docker-compose exec app npm install
+docker-compose exec app npm run dev
+```
+
+### Step 6: Run the Queue Worker
+
+The queue worker is **essential** for processing new tenant sign-ups. Run it in a separate terminal:
+
+```bash
+docker-compose exec app php artisan queue:work --queue=provisioning
+```
+
+---
+
+## 🧪 Running Tests
+
+To run the application's test suite, use the following command:
+
+```bash
+docker-compose exec app php artisan test
 ```
 
 ---
@@ -178,13 +170,13 @@ php artisan queue:work --queue=provisioning
 You are now ready to use the application!
 
 1.  **Onboard a New Tenant:**
-    *   Navigate to `http://myapp.test` and follow the sign-up flow.
-    *   **Remember:** After creating a tenant (e.g., with subdomain `xyz`), you must add `127.0.0.1 xyz.myapp.test` to your `hosts` file if not using DNS Server App.
+    *   Navigate to `http://localhost:8000` (which maps to `http://myapp.test` inside the container) and follow the sign-up flow.
+    *   **Remember:** After creating a tenant (e.g., with subdomain `xyz`), you must add `127.0.0.1 xyz.myapp.test` to your `hosts` file.
 
 2.  **Access the Tenant Workspace:**
-    *   Navigate to your tenant's URL: `http://xyz.myapp.test/login`
+    *   Navigate to your tenant's URL: `http://xyz.myapp.test:8000/login`
     *   Log in with the credentials you created during onboarding.
 
 3.  **Access the Landlord Panel:**
-    *   Navigate to `http://landlord.myapp.test`
-    *   You will be able to see the new tenant you created.
+    *   Navigate to `http://landlord.myapp.test:8000`
+    *   Log in with the seeded admin credentials. You will be able to see the new tenant you created.
